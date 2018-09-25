@@ -50,7 +50,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Text;
 using System.IO.Ports;                          //For all the serial port stuff
 using System.Runtime.Remoting.Messaging;        //For Async etc. stuff
 
