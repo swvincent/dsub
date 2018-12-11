@@ -14,7 +14,7 @@ To use dsub, just add the [ComPort class](/Dsub/ComPort.cs) to an existing appli
 
 dsub targets .NET Framework 4.7 / C# 7.0. As a result, it's compatible with Windows 7, 8.1 and 10.
 
-If you need compatibility with older versions of Windows, you can use [dsub version 1.5](https://github.com/swvincent/dsub/releases/tag/v1.5) which targets .NET Framework 4.0.
+If you need compatibility with older versions of Windows, you can use [dsub version 1.5](https://github.com/swvincent/dsub/releases/tag/v1.5) which targets .NET Framework 4.0. It's a little messier under the hood but is functionally the same as the current release.
 
 ## Example Application
 
