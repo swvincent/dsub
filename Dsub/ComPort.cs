@@ -65,12 +65,6 @@ namespace Dsub
         private Parity parity = Parity.None;
         private int dataBits = 8;
         private StopBits stopBits = StopBits.One;
-        private Handshake handshake = Handshake.None;
-        private string newLine = Environment.NewLine;
-        private int readTimeout = 500;      //0.5 sec.
-        private int writeTimeout = 500;     //0.5 sec.
-        private bool dtrEnable = false;
-        private bool rtsEnable = false;
 
         #endregion Declarations
 
@@ -81,13 +75,13 @@ namespace Dsub
         public Parity Parity { get { return parity; } set { parity = value; ReportSettings(); } }
         public int DataBits { get { return dataBits; } set { dataBits = value; ReportSettings(); } }
         public StopBits StopBits { get { return stopBits; } set { stopBits = value; ReportSettings(); } }
-        public Handshake Handshake { get { return handshake; } set { handshake = value; } }
-        public string NewLine { get { return newLine; } set { newLine = value; } }
-        public int ReadTimeout { get { return readTimeout; } set { readTimeout = value; } }
-        public int WriteTimeout { get { return writeTimeout; } set { writeTimeout = value; } }
-        public bool DtrEnable { get { return dtrEnable; } set { dtrEnable = value; } }
-        public bool RtsEnable { get { return rtsEnable; } set { rtsEnable = value; } }
-        public bool IsOpen { get { return serialPort.IsOpen; } }
+        public Handshake Handshake { get; set; } = Handshake.None;
+        public string NewLine { get; set; } = Environment.NewLine;
+        public int ReadTimeout { get; set; } = 500;
+        public int WriteTimeout { get; set; } = 500;
+        public bool DtrEnable { get; set; } = false;
+        public bool RtsEnable { get; set; } = false;
+        public bool IsOpen => serialPort.IsOpen;
 
         #endregion Properties
 
@@ -205,14 +199,14 @@ namespace Dsub
                     serialPort.Parity = this.parity;
                     serialPort.DataBits = this.dataBits;
                     serialPort.StopBits = this.stopBits;
-                    serialPort.Handshake = this.handshake;
-                    serialPort.NewLine = this.newLine;
+                    serialPort.Handshake = this.Handshake;
+                    serialPort.NewLine = this.NewLine;
                     //For timeouts, I accept anything <=0 to mean infinite timeout. This negates the need to check it
                     //when the user enter it, every value will work now. Otherwise you get ArgumentOutOfRangeException.
-                    serialPort.ReadTimeout = this.readTimeout <= 0 ? SerialPort.InfiniteTimeout : this.readTimeout;
-                    serialPort.WriteTimeout = this.writeTimeout <= 0 ? SerialPort.InfiniteTimeout : this.writeTimeout;
-                    serialPort.DtrEnable = this.dtrEnable;
-                    serialPort.RtsEnable = this.rtsEnable;
+                    serialPort.ReadTimeout = this.ReadTimeout <= 0 ? SerialPort.InfiniteTimeout : this.ReadTimeout;
+                    serialPort.WriteTimeout = this.WriteTimeout <= 0 ? SerialPort.InfiniteTimeout : this.WriteTimeout;
+                    serialPort.DtrEnable = this.DtrEnable;
+                    serialPort.RtsEnable = this.RtsEnable;
                     serialPort.Open();
 
                     if (serialPort.IsOpen)
@@ -298,8 +292,8 @@ namespace Dsub
             this.parity = parity;
             this.dataBits = dataBits;
             this.stopBits = stopBits;
-            this.handshake = handshake;
-            this.newLine = newLine;
+            this.Handshake = handshake;
+            this.NewLine = newLine;
 
             ReportSettings();
         }
@@ -308,10 +302,10 @@ namespace Dsub
         public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake, string newLine,
             int readTimeout, int writeTimeout, bool dtrEnable, bool rtsEnable)
         {
-            this.readTimeout = readTimeout;
-            this.writeTimeout = writeTimeout;
-            this.dtrEnable = dtrEnable;
-            this.rtsEnable = rtsEnable;
+            this.ReadTimeout = readTimeout;
+            this.WriteTimeout = writeTimeout;
+            this.DtrEnable = dtrEnable;
+            this.RtsEnable = rtsEnable;
 
             ChangeSettings(portName, baudRate, parity, dataBits, stopBits, handshake, newLine);
         }
@@ -494,7 +488,7 @@ namespace Dsub
         {
             if (UserInterfaceData != null)
             {
-                string settings = $"{portName}, {baudRate}, {dataBits}, {parity}, {stopBits}, {handshake}";
+                string settings = $"{portName}, {baudRate}, {dataBits}, {parity}, {stopBits}, {Handshake}";
                 UserInterfaceData(ComPortEvent.ReportSettings, settings);
             }
         }
