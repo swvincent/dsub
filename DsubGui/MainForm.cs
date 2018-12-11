@@ -200,7 +200,7 @@ namespace DsubGui
                     //Must "unescape" the text to write so user can specify CR, LF, etc.
                     string textToWrite = Regex.Unescape(writeTextBox.Text);
 
-                    comPort.writeDelegate = new ComPort.WriteToComPortDelegate(comPort.WriteToComPort);
+                    comPort.writeDelegate = new ComPort.WriteToComPortDelegate(comPort.WriteTextToComPort);
                     ar = comPort.writeDelegate.BeginInvoke(textToWrite, new AsyncCallback(comPort.WriteCompleted), dateStamp);
                 }
                 catch (ArgumentException caught)

@@ -3,27 +3,7 @@
 /// www.swvincent.com/dsub
 /// www.github.com/swvincent/dsub
 /// 
-/// This code has been developed for .NET Framework 4.0.
-/// 
-/// Change History (before using Git)
-/// 
-/// Date        Desc.
-/// =========   ===================================================================================
-/// 4/15/2012   Started
-/// 8/21/2012   Initial release
-/// 8/17/2015   Fixed some bugs. Biggest was if you close/reopen port, timeouts w/ empty buffer
-///                 started occuring. It seems it was b/c I reattached events each time port opens,
-///                 instead of doing it once when serialPort is created. Also added ability to set
-///                 timeouts and DTR/RTS enable, latter is needed for Arduino Leonardo.
-/// 9/3/2015    Added ability to report back success from write operation made in separate thread.
-///                 Before it only reported back on errors. Also some minor fixes to avoid crashes.
-///                 And minor fixes to GUI application, tab order, etc. And added DiscardInBuffer/
-///                 DiscardOutBuffer. And switched Invoke to BeginInvoke to avoid deadlock on
-///                 close. Phew!
-/// 9/8/2015   Nicer error message if port doesn't exist.
-///                 Thanks to Kean (http://www.kean.com.au/) for pointing it out!
-/// 2/21/2018   Using .Dispose instead of .Close now based on page 161 Serial Port Complete 2nd ed
-/// 9/25/2018   Minor code/comments cleanup and initial Git Commit.
+/// This class has been written for .NET Framework 4.7.
 /// 
 /// MIT License
 /// 
@@ -50,8 +30,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO.Ports;                          //For all the serial port stuff
-using System.Runtime.Remoting.Messaging;        //For Async etc. stuff
+using System.IO.Ports;
+using System.Runtime.Remoting.Messaging;
 
 namespace Dsub
 {
@@ -70,13 +50,10 @@ namespace Dsub
             ReportSerialSuccess
         }
 
-        //Public members
         public delegate void UserInterfaceDataEventHandler(ComPortEvent comPortEvent, string message);
         public static event UserInterfaceDataEventHandler UserInterfaceData;
         public delegate bool WriteToComPortDelegate(string textToWrite);
         public WriteToComPortDelegate writeDelegate;
-
-        //Private members
         private SerialPort serialPort;
         private SerialDataReceivedEventHandler serialDataReceivedEventHandler1;
         private SerialErrorReceivedEventHandler serialErrorReceivedEventHandler1;
@@ -116,9 +93,6 @@ namespace Dsub
 
         #region Constructors
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
         public ComPort()
         {
             //Create the new port and report that it's closed.
@@ -133,16 +107,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Constructor which accepts port settings and reports back settings.
-        /// </summary>
-        /// <param name="portName">Port Name</param>
-        /// <param name="baudRate">Baud Rate</param>
-        /// <param name="parity">Parity</param>
-        /// <param name="dataBits">Data Bits</param>
-        /// <param name="stopBits">Stop Bits</param>
-        /// <param name="handshake">Handshake</param>
-        /// <param name="newLine">New Line character</param>
         public ComPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits,
             Handshake handshake, string newLine) : this()
         {
@@ -150,20 +114,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Constructor which accepts port settings and reports back settings.
-        /// </summary>
-        /// <param name="portName">Port Name</param>
-        /// <param name="baudRate">Baud Rate</param>
-        /// <param name="parity">Parity</param>
-        /// <param name="dataBits">Data Bits</param>
-        /// <param name="stopBits">Stop Bits</param>
-        /// <param name="handshake">Handshake</param>
-        /// <param name="newLine">New Line character</param>
-        /// <param name="readTimeout">Read Timeout</param>
-        /// <param name="writeTimeout">Write Timeout</param>
-        /// <param name="dtrEnable">DTR Enable</param>
-        /// <param name="rtsEnable">RTS Enable</param>
         public ComPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits,
             Handshake handshake, string newLine, int readTimeout, int writeTimeout, bool dtrEnable, bool rtsEnable)
             : this()
@@ -176,20 +126,11 @@ namespace Dsub
 
         #region Static Methods
 
-        /// <summary>
-        /// See if a given port exists.
-        /// </summary>
-        /// <param name="portName">Port to check existence of.</param>
-        /// <returns>True if port is found, false otherwise.</returns>
         public static bool PortExists(string portName)
         {
             return SerialPort.GetPortNames().Contains(portName);
         }
 
-        /// <summary>
-        /// Retrieve list of COM ports.
-        /// </summary>
-        /// <returns>List of COM ports.  If no ports exists, returns null.</returns>
         public static List<string> RetrieveComPortList()
         {
             List<string> comPortList = new List<string>(SerialPort.GetPortNames());
@@ -206,36 +147,26 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Retrieve list of baud rates.
-        /// </summary>
-        /// <returns>List of baud rates.</returns>
         /// <remarks>
         /// I used http://www.developerfusion.com/article/22/com-ports-technical-information/2/ as a guide.
         /// </remarks>
         public static List<int> RetrieveBaudRateList()
         {
-            return new List<int>(new int[] { 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 56000, 57600, 115200, 128000, 256000 });
+            return new List<int>(new int[] { 110, 300, 600, 1200, 2400, 4800, 9600,
+                14400, 19200, 28800, 38400, 56000, 57600, 115200, 128000, 256000 });
         }
 
 
-        /// <summary>
-        /// Retrieve list of Handshake settings.
-        /// </summary>
-        /// <returns>List of handshake settings.</returns>
         /// <remarks>
         /// http://stackoverflow.com/questions/1167361/how-do-i-convert-an-enum-to-a-list-in-c was helpful.
         /// </remarks>
         public static List<Handshake> RetrieveHandshakeList()
         {
-            return Handshake.GetValues(typeof(Handshake)).Cast<Handshake>().ToList();
+            return Handshake.GetValues(typeof(Handshake))
+                .Cast<Handshake>().ToList();
         }
 
 
-        /// <summary>
-        /// Retrieve list of Data Bits settings.
-        /// </summary>
-        /// <returns>List of Data Bits settings.</returns>
         /// <remarks>
         /// I used http://www.developerfusion.com/article/22/com-ports-technical-information/4/ as a guide.
         /// </remarks>
@@ -244,34 +175,24 @@ namespace Dsub
             return new List<int>(new int[] { 4, 5, 6, 7, 8 });
         }
 
-        /// <summary>
-        /// Retrieve list of Parity settings.
-        /// </summary>
-        /// <returns>List of parity settings.</returns>
+        
         public static List<Parity> RetrieveParityList()
         {
-            return Parity.GetValues(typeof(Parity)).Cast<Parity>().ToList();
+            return Parity.GetValues(typeof(Parity))
+                .Cast<Parity>().ToList();
         }
 
-
-        /// <summary>
-        /// Retrieve list of StopBits settings.
-        /// </summary>
-        /// <returns>List of StopBits settings.</returns>
+        
         public static List<StopBits> RetrieveStopBitsList()
         {
-            return StopBits.GetValues(typeof(StopBits)).Cast<StopBits>().ToList();
+            return StopBits.GetValues(typeof(StopBits))
+                .Cast<StopBits>().ToList();
         }
 
         #endregion Static Methods
 
         #region Public Methods
 
-        /// <summary>
-        /// Open the serial port
-        /// </summary>
-        /// <returns>True if success, false otherwise</returns>
-        /// <param name="portName">Port Name</param>
         public bool OpenPort()
         {
             try
@@ -315,8 +236,8 @@ namespace Dsub
                 //Unauthorized Access - port is probably already in use.
                 if (UserInterfaceData != null)
                 {
-                    string errorMessage = "Access to " + serialPort.PortName +
-                    " is denied. It may already be in use by another application or process.";
+                    string errorMessage = $"Access to {serialPort.PortName} is denied. " +
+                        "It may already be in use by another application or process.";
                     UserInterfaceData(ComPortEvent.ReportException, errorMessage);
                 }
                 return false;
@@ -332,11 +253,13 @@ namespace Dsub
             }
             catch (ArgumentOutOfRangeException)
             {
-                //There is an invalid setting. Shouldn't happen if GUI limits settings to values provided by this class.
+                //There is an invalid setting. Shouldn't happen if GUI limits
+                //settings to values provided by this class.
                 if (UserInterfaceData != null)
                 {
-                    string errorMessage = "Cannot open " + serialPort.PortName + ": One or more settings are invalid. Please verify " +
-                    "that the settings are correct and try again.";
+                    string errorMessage = $"Cannot open {serialPort.PortName}: " +
+                        "One or more settings are invalid. Please verify " +
+                        "that the settings are correct and try again.";
                     UserInterfaceData(ComPortEvent.ReportException, errorMessage);
                 }
                 return false;
@@ -350,9 +273,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Close COM port.
-        /// </summary>
         public void ClosePort()
         {
             try
@@ -371,16 +291,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Change several settings at once.
-        /// </summary>
-        /// <param name="portName">Port Name</param>
-        /// <param name="baudRate">Baud Rate</param>
-        /// <param name="parity">Parity</param>
-        /// <param name="dataBits">Data Bits</param>
-        /// <param name="stopBits">Stop Bits</param>
-        /// <param name="handshake">Handshake</param>
-        /// <param name="newLine">New Line character</param>
         public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake, string newLine)
         {
             this.portName = portName;
@@ -395,20 +305,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Change several settings at once.
-        /// </summary>
-        /// <param name="portName">Port Name</param>
-        /// <param name="baudRate">Baud Rate</param>
-        /// <param name="parity">Parity</param>
-        /// <param name="dataBits">Data Bits</param>
-        /// <param name="stopBits">Stop Bits</param>
-        /// <param name="handshake">Handshake</param>
-        /// <param name="newLine">New Line character</param>
-        /// <param name="readTimeout">Read Timeout</param>
-        /// <param name="writeTimeout">Write Timeout</param>
-        /// <param name="dtrEnable">DTR Enable</param>
-        /// <param name="rtsEnable">RTS Enable</param>
         public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake, string newLine,
             int readTimeout, int writeTimeout, bool dtrEnable, bool rtsEnable)
         {
@@ -421,12 +317,7 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Write text COM port.
-        /// </summary>
-        /// <param name="textToWrite">Text to write to port.</param>
-        /// <returns>True if operation succeeds, false otherwise.</returns>
-        public bool WriteToComPort(string textToWrite)
+        public bool WriteTextToComPort(string textToWrite)
         {
             bool success = false;
 
@@ -477,14 +368,11 @@ namespace Dsub
                 if (success)
                     UserInterfaceData(ComPortEvent.ReportSerialSuccess, msg);
                 else
-                    UserInterfaceData(ComPortEvent.ReportSerialError, "Write operation started  " + msg + " did not return success");
+                    UserInterfaceData(ComPortEvent.ReportSerialError, $"Write operation started {msg} did not return success");
             }
         }
 
 
-        /// <summary>
-        /// Discard in buffer if port is open.
-        /// </summary>
         public void DiscardInBuffer()
         {
             if (serialPort.IsOpen)
@@ -501,9 +389,6 @@ namespace Dsub
         }
 
 
-        /// <summary>
-        /// Discard out buffer if port is open.
-        /// </summary>
         public void DiscardOutBuffer()
         {
             if (serialPort.IsOpen)
@@ -523,11 +408,6 @@ namespace Dsub
 
         #region Private Methods
 
-        /// <summary>
-        /// Handle data received from com port.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             string inData = null;
@@ -543,11 +423,11 @@ namespace Dsub
             {
                 //Timeout error handler
                 if (UserInterfaceData != null)
-                    UserInterfaceData(ComPortEvent.ReportSerialError, "Timeout Occured.  Buffer contents:" + "'" + serialPort.ReadExisting() + "'");
+                    UserInterfaceData(ComPortEvent.ReportSerialError,
+                        $"Timeout Occured. Buffer contents: '{serialPort.ReadExisting()}'");
             }
             catch (Exception caught)
             {
-                //Generic error handler
                 ReportException(caught);
             }
         }
@@ -569,22 +449,22 @@ namespace Dsub
                 switch (SerialErrorReceived1)
                 {
                     case SerialError.Frame:
-                        message = "Framing error on " + serialPort.PortName;
+                        message = $"Framing error on {serialPort.PortName}";
                         break;
                     case SerialError.Overrun:
-                        message = "Character buffer overrun on " + serialPort.PortName;
+                        message = $"Character buffer overrun on {serialPort.PortName}";
                         break;
                     case SerialError.RXOver:
-                        message = "Input buffer overflow on " + serialPort.PortName;
+                        message = $"Input buffer overflow on {serialPort.PortName}";
                         break;
                     case SerialError.RXParity:
-                        message = "Parity error on " + serialPort.PortName;
+                        message = $"Parity error on {serialPort.PortName}";
                         break;
                     case SerialError.TXFull:
-                        message = "Output buffer full on " + serialPort.PortName;
+                        message = $"Output buffer full on {serialPort.PortName}";
                         break;
                     default:
-                        message = "Unknown error on " + serialPort.PortName;
+                        message = $"Unknown error on {serialPort.PortName}";
                         break;
                 }
 
@@ -601,8 +481,7 @@ namespace Dsub
         {
             if (UserInterfaceData != null)
             {
-                string errorMessage = "Exception occured in ComPort (" + serialPort.PortName + "): " + ex.Message +
-                    Environment.NewLine + Environment.NewLine + ex.ToString();
+                string errorMessage = $"Exception occured in ComPort ({serialPort.PortName}): {ex.Message}\n\n{ex.ToString()}";
                 UserInterfaceData(ComPortEvent.ReportException, errorMessage);
             }
         }
@@ -615,8 +494,7 @@ namespace Dsub
         {
             if (UserInterfaceData != null)
             {
-                string settings = portName + "," + baudRate.ToString() + "," + dataBits.ToString() + "," +
-                    parity.ToString() + "," + stopBits.ToString() + "," + handshake.ToString();
+                string settings = $"{portName}, {baudRate}, {dataBits}, {parity}, {stopBits}, {handshake}";
                 UserInterfaceData(ComPortEvent.ReportSettings, settings);
             }
         }
