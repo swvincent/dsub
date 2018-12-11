@@ -10,6 +10,12 @@ dsub uses SerialPort.ReadLine(), so it's required that any data being received h
 
 To use dsub, just add the [ComPort class](/Dsub/ComPort.cs) to an existing application.
 
+## Compatibility
+
+dsub targets .NET Framework 4.7 / C# 7.0. As a result, it's compatible with Windows 7, 8.1 and 10.
+
+If you need compatibility with older versions of Windows, you can use [dsub version 1.5](https://github.com/swvincent/dsub/releases/tag/v1.5) which targets .NET Framework 4.0.
+
 ## Example Application
 
 The GUI application that’s included will read data from the selected serial port and display it in a grid. If a field delimiter is specified, it will use that to break up the data into separate columns in the grid. At the bottom of the screen, you can enter text to be sent. There is also a textbox where errors will be displayed. The application implements all the features of dsub so it provides a good example of how to use it.
