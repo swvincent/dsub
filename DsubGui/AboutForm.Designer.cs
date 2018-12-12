@@ -32,7 +32,6 @@
             this.TitleLabel = new System.Windows.Forms.Label();
             this.closeButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -69,15 +68,6 @@
             this.pictureBox1.Size = new System.Drawing.Size(182, 95);
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(207, 91);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(96, 13);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "9/25/2018 release";
             // 
             // label2
             // 
@@ -141,7 +131,6 @@
             this.Controls.Add(this.licenseTextBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.TitleLabel);
@@ -167,7 +156,6 @@
         private System.Windows.Forms.Label TitleLabel;
         private System.Windows.Forms.Button closeButton;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;

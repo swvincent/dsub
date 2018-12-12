@@ -2,21 +2,6 @@
 /// dsub Project
 /// http://www.swvincent.com/dsub
 /// 
-/// This code has been developed for .NET Framework 4.0 with Microsoft Visual Studio 2010 Professional.
-/// 
-/// Change History
-/// 
-/// Date        Version     Desc.
-/// =========   =======     ===============================================================================================================
-/// 4/15/2012   -           Started
-/// 8/21/2012   1.0         Initial release
-/// 8/17/2015   1.1         Fixed some bugs. Biggest was if you close/reopen port, timeouts w/ empty buffer started occuring. It seems it
-///                         was b/c I reattached events each time port opens, instead of doing it once when serialPort is created. Oops.
-///                         Also added ability to set timeouts and DTR/RTS enable, latter is needed for Arduino Leonardo for some reason.
-/// 9/3/2015    1.2         Added ability to report back success from write operation made in separate thread. Before it only reported back
-///                         on errors. Also some minor fixes to avoid crashes. And minor fixes to GUI application, tab order, etc.
-///                         And added DiscardInBuffer/DiscardOutBuffer. And switched Invoke to BeginInvoke to avoid deadlock on close. Ugh!
-/// 
 /// Copyright (c) 2012, 2015 Scott W. Vincent
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -107,12 +92,11 @@ namespace DsubGui
                     break;
                 case ComPort.ComPortEvent.ReportSerialError:
                     //Serial error occured in ComPort.
-                    comPortErrorsTextBox.AppendText(DateTime.Now.ToString() + " - " + comPortData + Environment.NewLine);
+                    comPortErrorsTextBox.AppendText($"{DateTime.Now.ToString()} - {comPortData}\n");
                     break;
                 case ComPort.ComPortEvent.ReportSerialSuccess:
                     //Success occured on write
-                    comPortErrorsTextBox.AppendText(DateTime.Now.ToString() + " - " + "Write succeeded with message: "
-                        + comPortData + Environment.NewLine);
+                    comPortErrorsTextBox.AppendText($"{DateTime.Now.ToString()} - Write succeeded with message: {comPortData}\n");
                     break;
             }
         }
@@ -206,8 +190,8 @@ namespace DsubGui
                 catch (ArgumentException caught)
                 {
                     //Unrecognized escape sequence
-                    MessageBox.Show("The entered text cannot be parsed. Details:" + Environment.NewLine + Environment.NewLine +
-                        caught.Message, "Parse error" + Environment.NewLine + Environment.NewLine + "Please correct the text and try again.",
+                    MessageBox.Show($"The entered text cannot be parsed. Details:\n\n{caught.Message}" +
+                        "\n\nPlease correct the text and try again.", "Parse error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
