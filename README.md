@@ -1,3 +1,5 @@
+**NOTE: This is the net40 branch, which contains a version of dsub that targets .NET Framework 4.0 Client Profile. The most recent version of dsub is available in the [master branch](https://github.com/swvincent/dsub).**
+
 # dsub
 
 dsub is a class that builds upon .NET's built-in SerialPort class. It adds functionality to deal with multi-threading, error-handling, etc.
