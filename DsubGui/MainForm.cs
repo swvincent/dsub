@@ -4,20 +4,7 @@
 /// 
 /// This code has been developed for .NET Framework 4.0 with Microsoft Visual Studio 2010 Professional.
 /// 
-/// Change History
-/// 
-/// Date        Version     Desc.
-/// =========   =======     ===============================================================================================================
-/// 4/15/2012   -           Started
-/// 8/21/2012   1.0         Initial release
-/// 8/17/2015   1.1         Fixed some bugs. Biggest was if you close/reopen port, timeouts w/ empty buffer started occuring. It seems it
-///                         was b/c I reattached events each time port opens, instead of doing it once when serialPort is created. Oops.
-///                         Also added ability to set timeouts and DTR/RTS enable, latter is needed for Arduino Leonardo for some reason.
-/// 9/3/2015    1.2         Added ability to report back success from write operation made in separate thread. Before it only reported back
-///                         on errors. Also some minor fixes to avoid crashes. And minor fixes to GUI application, tab order, etc.
-///                         And added DiscardInBuffer/DiscardOutBuffer. And switched Invoke to BeginInvoke to avoid deadlock on close. Ugh!
-/// 
-/// Copyright (c) 2012, 2015 Scott W. Vincent
+/// Copyright (c) 2012, 2015, 2018 Scott W. Vincent
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -46,8 +33,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Dsub;                               //ComPort class
-using DsubGui.Properties;                 //for Application settings
+using Dsub;                                 //ComPort class
+using DsubGui.Properties;                   //for Application settings
 using System.Text.RegularExpressions;       //RegEx
 using scooter;                              //Utility code
 
@@ -207,7 +194,7 @@ namespace DsubGui
                 {
                     //Unrecognized escape sequence
                     MessageBox.Show("The entered text cannot be parsed. Details:" + Environment.NewLine + Environment.NewLine +
-                        caught.Message, "Parse error" + Environment.NewLine + Environment.NewLine + "Please correct the text and try again.",
+                        caught.Message + Environment.NewLine + Environment.NewLine + "Please correct the text and try again.", "Parse error",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
