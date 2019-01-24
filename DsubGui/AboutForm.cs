@@ -36,7 +36,7 @@ namespace DsubGui
         private void AboutForm_Load(object sender, EventArgs e)
         {
             const string WEB_LINK = "http://www.swvincent.com/dsub";
-            const string LICENSE_TEXT = @"Copyright (c) 2018 Scott W. Vincent
+            const string LICENSE_TEXT = @"Copyright (c) 2019 Scott W. Vincent
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the ""Software""), to deal

@@ -7,7 +7,7 @@
 /// 
 /// MIT License
 /// 
-/// Copyright (c) 2018 Scott W. Vincent
+/// Copyright (c) 2019 Scott W. Vincent
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -228,34 +228,25 @@ namespace Dsub
             catch (UnauthorizedAccessException)
             {
                 //Unauthorized Access - port is probably already in use.
-                if (UserInterfaceData != null)
-                {
-                    string errorMessage = $"Access to {serialPort.PortName} is denied. " +
+                string errorMessage = $"Access to {serialPort.PortName} is denied. " +
                         "It may already be in use by another application or process.";
-                    UserInterfaceData(ComPortEvent.ReportException, errorMessage);
-                }
+                UserInterfaceData?.Invoke(ComPortEvent.ReportException, errorMessage);
                 return false;
             }
             catch (System.IO.IOException caught)
             {
                 //Port likely doesn't exist, which will be in the message.
-                if (UserInterfaceData != null)
-                {
-                    UserInterfaceData(ComPortEvent.ReportException, caught.Message);
-                }
+                UserInterfaceData?.Invoke(ComPortEvent.ReportException, caught.Message);
                 return false;
             }
             catch (ArgumentOutOfRangeException)
             {
                 //There is an invalid setting. Shouldn't happen if GUI limits
                 //settings to values provided by this class.
-                if (UserInterfaceData != null)
-                {
-                    string errorMessage = $"Cannot open {serialPort.PortName}: " +
+                string errorMessage = $"Cannot open {serialPort.PortName}: " +
                         "One or more settings are invalid. Please verify " +
                         "that the settings are correct and try again.";
-                    UserInterfaceData(ComPortEvent.ReportException, errorMessage);
-                }
+                UserInterfaceData?.Invoke(ComPortEvent.ReportException, errorMessage);
                 return false;
             }
             catch (Exception caught)
@@ -285,7 +276,8 @@ namespace Dsub
         }
 
 
-        public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake, string newLine)
+        public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits,
+            StopBits stopBits, Handshake handshake, string newLine)
         {
             this.portName = portName;
             this.baudRate = baudRate;
@@ -299,8 +291,8 @@ namespace Dsub
         }
 
 
-        public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake, string newLine,
-            int readTimeout, int writeTimeout, bool dtrEnable, bool rtsEnable)
+        public void ChangeSettings(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits,
+            Handshake handshake, string newLine, int readTimeout, int writeTimeout, bool dtrEnable, bool rtsEnable)
         {
             this.ReadTimeout = readTimeout;
             this.WriteTimeout = writeTimeout;
@@ -325,8 +317,7 @@ namespace Dsub
             }
             catch (TimeoutException)
             {
-                if (UserInterfaceData != null)
-                    UserInterfaceData(ComPortEvent.ReportSerialError, "Time out occured on write");
+                UserInterfaceData?.Invoke(ComPortEvent.ReportSerialError, "Time out occured on write");
             }
             catch (Exception caught)
             {
@@ -357,13 +348,11 @@ namespace Dsub
 
             success = deleg.EndInvoke(ar);
 
-            if (UserInterfaceData != null)
-            {
-                if (success)
-                    UserInterfaceData(ComPortEvent.ReportSerialSuccess, msg);
-                else
-                    UserInterfaceData(ComPortEvent.ReportSerialError, $"Write operation started {msg} did not return success");
-            }
+            if (success)
+                UserInterfaceData?.Invoke(ComPortEvent.ReportSerialSuccess, msg);
+            else
+                UserInterfaceData?.Invoke(ComPortEvent.ReportSerialError,
+                    $"Write operation started {msg} did not return success");
         }
 
 
@@ -409,16 +398,13 @@ namespace Dsub
             try
             {
                 inData = serialPort.ReadLine();
-
-                if (UserInterfaceData != null)
-                    UserInterfaceData(ComPortEvent.ReturnNewData, inData);
+                UserInterfaceData?.Invoke(ComPortEvent.ReturnNewData, inData);
             }
             catch (TimeoutException)
             {
                 //Timeout error handler
-                if (UserInterfaceData != null)
-                    UserInterfaceData(ComPortEvent.ReportSerialError,
-                        $"Timeout Occured. Buffer contents: '{serialPort.ReadExisting()}'");
+                UserInterfaceData?.Invoke(ComPortEvent.ReportSerialError,
+                    $"Timeout Occured. Buffer contents: '{serialPort.ReadExisting()}'");
             }
             catch (Exception caught)
             {
@@ -436,34 +422,31 @@ namespace Dsub
         {
             SerialError SerialErrorReceived1 = e.EventType;
 
-            if (UserInterfaceData != null)
+            string message;
+
+            switch (SerialErrorReceived1)
             {
-                string message;
-
-                switch (SerialErrorReceived1)
-                {
-                    case SerialError.Frame:
-                        message = $"Framing error on {serialPort.PortName}";
-                        break;
-                    case SerialError.Overrun:
-                        message = $"Character buffer overrun on {serialPort.PortName}";
-                        break;
-                    case SerialError.RXOver:
-                        message = $"Input buffer overflow on {serialPort.PortName}";
-                        break;
-                    case SerialError.RXParity:
-                        message = $"Parity error on {serialPort.PortName}";
-                        break;
-                    case SerialError.TXFull:
-                        message = $"Output buffer full on {serialPort.PortName}";
-                        break;
-                    default:
-                        message = $"Unknown error on {serialPort.PortName}";
-                        break;
-                }
-
-                UserInterfaceData(ComPortEvent.ReportSerialError, message);
+                case SerialError.Frame:
+                    message = $"Framing error on {serialPort.PortName}";
+                    break;
+                case SerialError.Overrun:
+                    message = $"Character buffer overrun on {serialPort.PortName}";
+                    break;
+                case SerialError.RXOver:
+                    message = $"Input buffer overflow on {serialPort.PortName}";
+                    break;
+                case SerialError.RXParity:
+                    message = $"Parity error on {serialPort.PortName}";
+                    break;
+                case SerialError.TXFull:
+                    message = $"Output buffer full on {serialPort.PortName}";
+                    break;
+                default:
+                    message = $"Unknown error on {serialPort.PortName}";
+                    break;
             }
+
+            UserInterfaceData?.Invoke(ComPortEvent.ReportSerialError, message);
         }
 
 
@@ -473,11 +456,9 @@ namespace Dsub
         /// <param name="ex">Exception to report on</param>
         private void ReportException(Exception ex)
         {
-            if (UserInterfaceData != null)
-            {
-                string errorMessage = $"Exception occured in ComPort ({serialPort.PortName}): {ex.Message}\n\n{ex.ToString()}";
-                UserInterfaceData(ComPortEvent.ReportException, errorMessage);
-            }
+            string errorMessage = $"Exception occured in ComPort ({serialPort.PortName}): {ex.Message}\n\n{ex.ToString()}";
+            UserInterfaceData?.Invoke(ComPortEvent.ReportException, errorMessage);
+         
         }
 
 
@@ -486,11 +467,8 @@ namespace Dsub
         /// </summary>
         private void ReportSettings()
         {
-            if (UserInterfaceData != null)
-            {
-                string settings = $"{portName}, {baudRate}, {dataBits}, {parity}, {stopBits}, {Handshake}";
-                UserInterfaceData(ComPortEvent.ReportSettings, settings);
-            }
+            string settings = $"{portName}, {baudRate}, {dataBits}, {parity}, {stopBits}, {Handshake}";
+            UserInterfaceData?.Invoke(ComPortEvent.ReportSettings, settings);
         }
 
 
@@ -500,10 +478,7 @@ namespace Dsub
         /// <param name="statusText"></param>
         private void ReportStatus(string statusText)
         {
-            if (UserInterfaceData != null)
-            {
-                UserInterfaceData(ComPortEvent.ReportStatus, statusText);
-            }
+            UserInterfaceData?.Invoke(ComPortEvent.ReportStatus, statusText);
         }
 
         #endregion Private Methods
