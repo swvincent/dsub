@@ -2,7 +2,7 @@
 /// dsub Project
 /// http://www.swvincent.com/dsub
 /// 
-/// Copyright (c) 2012, 2015 Scott W. Vincent
+/// Copyright (c) 2019 Scott W. Vincent
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -168,7 +168,7 @@ namespace DsubGui
 
         /// <summary>
         /// Write text in writeTextBox to COM port, in separate thread.
-        /// ComPort.WriteToComPort can be used instead if you want to send in the GUI thread.
+        /// ComPort.WriteText can be used instead if you want to send in the GUI thread.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -184,7 +184,7 @@ namespace DsubGui
                     //Must "unescape" the text to write so user can specify CR, LF, etc.
                     string textToWrite = Regex.Unescape(writeTextBox.Text);
 
-                    comPort.writeDelegate = new ComPort.WriteToComPortDelegate(comPort.WriteTextToComPort);
+                    comPort.writeDelegate = new ComPort.WriteTextDelegate(comPort.WriteText);
                     ar = comPort.writeDelegate.BeginInvoke(textToWrite, new AsyncCallback(comPort.WriteCompleted), dateStamp);
                 }
                 catch (ArgumentException caught)

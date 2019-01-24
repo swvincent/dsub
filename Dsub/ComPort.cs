@@ -52,8 +52,8 @@ namespace Dsub
 
         public delegate void UserInterfaceDataEventHandler(ComPortEvent comPortEvent, string message);
         public static event UserInterfaceDataEventHandler UserInterfaceData;
-        public delegate bool WriteToComPortDelegate(string textToWrite);
-        public WriteToComPortDelegate writeDelegate;
+        public delegate bool WriteTextDelegate(string textToWrite);
+        public WriteTextDelegate writeDelegate;
         private SerialPort serialPort;
         private SerialDataReceivedEventHandler serialDataReceivedEventHandler1;
         private SerialErrorReceivedEventHandler serialErrorReceivedEventHandler1;
@@ -127,17 +127,13 @@ namespace Dsub
 
         public static List<string> RetrieveComPortList()
         {
-            List<string> comPortList = new List<string>(SerialPort.GetPortNames());
+            List<string> comPortList = new List<string>(
+                SerialPort.GetPortNames().OrderBy(p => p));
 
-            if (comPortList.Count > 0)
-            {
-                comPortList.Sort();
+            if (comPortList.Any())
                 return comPortList;
-            }
             else
-            {
                 return null;
-            }
         }
 
 
@@ -235,8 +231,11 @@ namespace Dsub
             }
             catch (System.IO.IOException caught)
             {
-                //Port likely doesn't exist, which will be in the message.
-                UserInterfaceData?.Invoke(ComPortEvent.ReportException, caught.Message);
+                //Port doesn't exist, or a parameter isn't supported, such as baud rate, etc.
+                string errorMessage = "An I/O error occured. The specified port may not exist, " +
+                    "or one or more of the specified parameters may not be supported. More details:" +
+                    $"\n\n{caught.Message}";
+                UserInterfaceData?.Invoke(ComPortEvent.ReportException, errorMessage);
                 return false;
             }
             catch (ArgumentOutOfRangeException)
@@ -251,7 +250,6 @@ namespace Dsub
             }
             catch (Exception caught)
             {
-                //Other exceptions
                 ReportException(caught);
                 return false;
             }
@@ -303,7 +301,7 @@ namespace Dsub
         }
 
 
-        public bool WriteTextToComPort(string textToWrite)
+        public bool WriteText(string textToWrite)
         {
             bool success = false;
 
@@ -334,7 +332,7 @@ namespace Dsub
         /// <param name="ar"></param>
         public void WriteCompleted(IAsyncResult ar)
         {
-            WriteToComPortDelegate deleg = null;
+            WriteTextDelegate deleg = null;
             string msg = null;
             bool success = false;
 
@@ -342,7 +340,7 @@ namespace Dsub
             msg = ar.AsyncState.ToString();
 
             //Get the value returned by the delegate.
-            deleg = ((WriteToComPortDelegate)(((AsyncResult)(ar)).AsyncDelegate));
+            deleg = ((WriteTextDelegate)(((AsyncResult)(ar)).AsyncDelegate));
 
             msg = ar.AsyncState.ToString();
 
