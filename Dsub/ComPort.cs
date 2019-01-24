@@ -55,8 +55,8 @@ namespace Dsub
         public delegate bool WriteTextDelegate(string textToWrite);
         public WriteTextDelegate writeDelegate;
         private SerialPort serialPort;
-        private SerialDataReceivedEventHandler serialDataReceivedEventHandler1;
-        private SerialErrorReceivedEventHandler serialErrorReceivedEventHandler1;
+        private readonly SerialDataReceivedEventHandler dataReceivedEventHandler;
+        private readonly SerialErrorReceivedEventHandler errorReceivedEventHandler;
 
         //Local variables available as properties
 
@@ -92,10 +92,10 @@ namespace Dsub
             //Create the new port and report that it's closed.
             serialPort = new SerialPort();
 
-            serialDataReceivedEventHandler1 = new SerialDataReceivedEventHandler(DataReceived);
-            serialErrorReceivedEventHandler1 = new SerialErrorReceivedEventHandler(ErrorReceived);
-            serialPort.DataReceived += serialDataReceivedEventHandler1;
-            serialPort.ErrorReceived += serialErrorReceivedEventHandler1;
+            dataReceivedEventHandler = new SerialDataReceivedEventHandler(DataReceived);
+            errorReceivedEventHandler = new SerialErrorReceivedEventHandler(ErrorReceived);
+            serialPort.DataReceived += dataReceivedEventHandler;
+            serialPort.ErrorReceived += errorReceivedEventHandler;
             
             ReportStatus("Port Closed");
         }
